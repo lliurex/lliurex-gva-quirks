@@ -1,0 +1,18 @@
+Source: lliurex-gva-quirks
+Section: misc
+Priority: standard
+Maintainer: Equipo LliureX <lliurex@gva.es>
+Build-Depends: debhelper (>= 7)
+Standards-Version: 3.9.3
+
+Package: lliurex-gva-quirks
+Architecture: any
+Depends: shim-signed
+Description: GVA Quirks
+ GVA Quirks and cli tool
+
+Package: lliurex-gva-quirks-prm
+Architecture: any
+Depends: lliurex-gva-quirks
+Description: PRM 1/2/3 Quirks
+ PRM 1/2/3 Quirks
