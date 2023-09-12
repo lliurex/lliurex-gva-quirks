@@ -1,36 +1,81 @@
-#! /bin/bash
+#!/bin/python3
 
-list_quirks()
-{
-    for f in /usr/lib/lliurex-gva-quirks/*; do
-        NAME=$(eval "$f name")
-        HELP=$(eval "$f help")
-        echo "$NAME    $HELP"
-    done
-}
+import sys
+import os
+import subprocess
 
-list_status()
-{
-    for f in /usr/lib/lliurex-gva-quirks/*; do
-        NAME=$(eval "$f name")
-        STATUS=$(eval "$f status")
+LLX_PLUGIN_PATH="/usr/lib/lliurex-gva-quirks/plugins/"
+LLX_CONFD_PATH="/usr/lib/lliurex-gva-quirks/conf.d/"
 
-        echo "$NAME : $STATUS"
-    done
-}
+PLUGIN_EXEC = 0
+PLUGIN_NAME = 1
+PLUGIN_DECRIPTION = 2
+PLUGIN_STATUS = 3
 
-case "$1" in
-    list)
-        list_quirks
-    ;;
+def _get_plugins():
+    plugins=[]
+    for f in os.listdir(LLX_PLUGIN_PATH):
+        plugin = LLX_PLUGIN_PATH+f
+        name = subprocess.getoutput("{0} name".format(plugin))
+        desc = subprocess.getoutput("{0} help".format(plugin))
+        status = subprocess.getoutput("{0} status".format(plugin))
 
-    status)
-        list_status
-    ;;
+        plugins.append([plugin,name,desc,status])
 
-    *)
-        exit 1
-    ;;
-esac
+    return plugins
 
-exit 0
+def list_plugins():
+    plugins = _get_plugins()
+    for p in plugins:
+        name = p[PLUGIN_NAME]
+        desc = p[PLUGIN_DECRIPTION]
+        print("{0}    {1}".format(name,desc))
+
+def status_plugins():
+    plugins = _get_plugins()
+    for p in plugins:
+        name = p[PLUGIN_NAME]
+        status = p[PLUGIN_STATUS]
+        print("{0}    {1}".format(name,status))
+
+def update_plugins():
+    torun={}
+    plugins = _get_plugins()
+
+    for f in os.listdir(LLX_CONFD_PATH):
+        tmp = f.split(".")
+        if (len(tmp)>1):
+            torun[tmp[1]]=True
+
+    found={}
+
+    for k in torun:
+        for p in plugins:
+            name = p[PLUGIN_NAME]
+
+            if name == k:
+                found[name] = p[PLUGIN_EXEC]
+
+    for k in found:
+        print("Running {0}:{1}".format(k,found[k]))
+`
+def main():
+    cmd = None
+
+    if (len(sys.argv)>1):
+        cmd = sys.argv[1]
+
+    if cmd == "list":
+        list_plugins()
+    elif cmd == "status":
+        status_plugins()
+    elif cmd == "update":
+        update_plugins()
+    else:
+        print("Expected command")
+
+
+if __name__=="__main__":
+    main()
+
+
