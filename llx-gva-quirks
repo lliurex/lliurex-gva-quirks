@@ -1,0 +1,36 @@
+#! /bin/bash
+
+list_quirks()
+{
+    for f in /usr/lib/lliurex-gva-quirks/*; do
+        NAME=$(eval "$f name")
+        HELP=$(eval "$f help")
+        echo "$NAME    $HELP"
+    done
+}
+
+list_status()
+{
+    for f in /usr/lib/lliurex-gva-quirks/*; do
+        NAME=$(eval "$f name")
+        STATUS=$(eval "$f status")
+
+        echo "$NAME : $STATUS"
+    done
+}
+
+case "$1" in
+    list)
+        list_quirks
+    ;;
+
+    status)
+        list_status
+    ;;
+
+    *)
+        exit 1
+    ;;
+esac
+
+exit 0

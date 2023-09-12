@@ -1,0 +1,58 @@
+#!/bin/bash
+
+GRUB_FILE="/etc/grub.d/50_lliurex_gva_quirks_sg"
+
+enable_secure_grub()
+{
+    read -r -n 32 RND_DATA < /dev/random
+    SUM=$(echo $RND_DATA | sha512sum -b)
+    SUM=($SUM)
+    echo $SUM
+    printf 'set superusers=\"root\"\npassword_pbkdf2 root grub.pbkdf2.sha512.10000.%s' $SUM > $GRUB_FILE
+}
+
+disable_secure_grub()
+{
+    if [ -f $GRUB_FILE ]; then
+        rm -f $GRUB_FILE
+    fi
+}
+
+status_secure_grub()
+{
+    if [ -f $GRUB_FILE ]; then
+        printf 'enabled'
+    else
+        printf 'disabled'
+    fi
+}
+
+case "$1" in
+    enable)
+        enable_secure_grub
+        /usr/sbin/update-grub
+    ;;
+
+    disable)
+        disable_secure_grub
+        /usr/sbin/update-grub
+    ;;
+
+    status)
+        status_secure_grub
+    ;;
+
+    name)
+        printf 'secure-grub'
+    ;;
+
+    help)
+        printf 'Protects grub with a random admin password'
+    ;;
+
+    *)
+        exit 1
+    ;;
+esac
+
+exit 0
