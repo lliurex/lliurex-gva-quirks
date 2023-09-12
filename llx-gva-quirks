@@ -57,8 +57,16 @@ def update_plugins():
                 found[name] = p[PLUGIN_EXEC]
 
     for k in found:
-        print("Running {0}:{1}".format(k,found[k]))
-`
+        print("Enabling {0}".format(k))
+        subprocess.getoutput("{0} enable".format(found[k]))
+
+    for p in plugins:
+        name = p[PLUGIN_NAME]
+
+        if not name in found:
+            print("Disabling {0}".format(p[PLUGIN_NAME]))
+            subprocess.getoutput("{0} disable".format(p[PLUGIN_EXEC]))
+
 def main():
     cmd = None
 
