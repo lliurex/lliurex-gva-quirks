@@ -1,4 +1,7 @@
 
+all:
+
+build:
 
 install:
 	mkdir -p $(DESTDIR)/usr/lib/lliurex-gva-quirks/plugins/
