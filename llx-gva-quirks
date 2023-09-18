@@ -38,10 +38,22 @@ def list_plugins():
 
 def status_plugins():
     plugins = _get_plugins()
+    tmp=[]
+    mlen = 0
+
     for p in plugins:
         name = p[PLUGIN_NAME]
         status = p[PLUGIN_STATUS]
-        print("{0}    {1}".format(name,status))
+        tmp.append((name,status))
+
+        if len(name) > mlen:
+            mlen = len(name)
+
+    mlen = mlen + 4
+
+    for name,status in tmp:
+        gap = " " * (mlen-len(name))
+        print("{0}{1}{2}".format(name,gap,status))
 
 def update_plugins():
     torun={}
@@ -73,16 +85,20 @@ def update_plugins():
 
         if name in enable:
             if enable[name] == True and status == STATUS_DISABLED:
-                print("Enabling {0}".format(name))
+                print("* Enabling {0}".format(name))
                 subprocess.getoutput("{0} enable".format(exec))
                 changes = changes + 1
 
             if enable[name] == False and status == STATUS_ENABLED:
-                print("Disabling {0}".format(name))
+                print("* Disabling {0}".format(name))
                 subprocess.getoutput("{0} disable".format(exec))
                 changes = changes + 1
         else:
-            pass
+            # disabling plugins without settings
+            if status == STATUS_ENABLED:
+                print("* Disabling {0}".format(name))
+                subprocess.getoutput("{0} disable".format(exec))
+                changes = changes + 1
 
     if changes==0:
         print("Everything is up to date")
