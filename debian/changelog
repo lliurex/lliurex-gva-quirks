@@ -1,3 +1,9 @@
+lliurex-gva-quirks (23.0.1.0) jammy; urgency=medium
+
+  * Jammy release
+
+ -- Enrique Medina Gremaldos <quiqueiii@gmail.com>  Mon, 18 Sep 2023 15:40:15 +0200
+
 lliurex-gva-quirks (23.0.1.0) focal; urgency=medium
 
   * Fixed makefile
