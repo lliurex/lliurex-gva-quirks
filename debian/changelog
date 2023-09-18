@@ -1,3 +1,9 @@
+lliurex-gva-quirks (23.0.0.2) focal; urgency=medium
+
+  * Missing install file
+
+ -- Enrique Medina Gremaldos <quiqueiii@gmail.com>  Mon, 18 Sep 2023 14:21:20 +0200
+
 lliurex-gva-quirks (23.0.0.1) focal; urgency=medium
 
   * Updated compat level
