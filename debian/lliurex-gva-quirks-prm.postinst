@@ -19,7 +19,7 @@ set -e
 
 case "$1" in
     configure)
-
+        llx-gva-quirks update
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
