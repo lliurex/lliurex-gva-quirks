@@ -1,7 +1,8 @@
 
 
 install:
-	mkdir -p $(DESTDIR)/usr/lib/lliurex-gva-quirks
+	mkdir -p $(DESTDIR)/usr/lib/lliurex-gva-quirks/plugins/
+	mkdir -p $(DESTDIR)/usr/lib/lliurex-gva-quirks/conf.d/
 	mkdir -p $(DESTDIR)/usr/bin
-	cp -r lliurex-gva-quirks/* $(DESTDIR)/usr/lib/lliurex-gva-quirks/
+	cp -r plugins/* $(DESTDIR)/usr/lib/lliurex-gva-quirks/plugins/
 	cp llx-gva-quirks $(DESTDIR)/usr/bin/

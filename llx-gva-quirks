@@ -1,36 +1,108 @@
-#! /bin/bash
+#!/bin/python3
 
-list_quirks()
-{
-    for f in /usr/lib/lliurex-gva-quirks/*; do
-        NAME=$(eval "$f name")
-        HELP=$(eval "$f help")
-        echo "$NAME    $HELP"
-    done
-}
+import sys
+import os
+import subprocess
+import json
+import glob
 
-list_status()
-{
-    for f in /usr/lib/lliurex-gva-quirks/*; do
-        NAME=$(eval "$f name")
-        STATUS=$(eval "$f status")
+LLX_PLUGIN_PATH="/usr/lib/lliurex-gva-quirks/plugins/"
+LLX_CONFD_PATH="/usr/lib/lliurex-gva-quirks/conf.d/"
 
-        echo "$NAME : $STATUS"
-    done
-}
+PLUGIN_EXEC = 0
+PLUGIN_NAME = 1
+PLUGIN_DECRIPTION = 2
+PLUGIN_STATUS = 3
 
-case "$1" in
-    list)
-        list_quirks
-    ;;
+STATUS_ENABLED = "enabled"
+STATUS_DISABLED = "disabled"
 
-    status)
-        list_status
-    ;;
+def _get_plugins():
+    plugins=[]
+    for f in os.listdir(LLX_PLUGIN_PATH):
+        plugin = LLX_PLUGIN_PATH+f
+        name = subprocess.getoutput("{0} name".format(plugin))
+        desc = subprocess.getoutput("{0} help".format(plugin))
+        status = subprocess.getoutput("{0} status".format(plugin))
 
-    *)
-        exit 1
-    ;;
-esac
+        plugins.append([plugin,name,desc,status])
 
-exit 0
+    return plugins
+
+def list_plugins():
+    plugins = _get_plugins()
+    for p in plugins:
+        name = p[PLUGIN_NAME]
+        desc = p[PLUGIN_DECRIPTION]
+        print("{0}    {1}".format(name,desc))
+
+def status_plugins():
+    plugins = _get_plugins()
+    for p in plugins:
+        name = p[PLUGIN_NAME]
+        status = p[PLUGIN_STATUS]
+        print("{0}    {1}".format(name,status))
+
+def update_plugins():
+    torun={}
+    plugins = _get_plugins()
+
+    enable = {}
+
+    for c in glob.glob(LLX_CONFD_PATH+"*.conf"):
+        try:
+            f = open(c)
+            data = json.load(f)
+            f.close()
+
+            for k in data["enable"]:
+                enable[k] = True
+
+            for k in data["disable"]:
+                enable[k] = False
+        except Exception as e:
+            print(e)
+            # just dont care about bad formatted jsons
+
+    changes = 0
+
+    for p in plugins:
+        name = p[PLUGIN_NAME]
+        status = p[PLUGIN_STATUS]
+        exec = p[PLUGIN_EXEC]
+
+        if name in enable:
+            if enable[name] == True and status == STATUS_DISABLED:
+                print("Enabling {0}".format(name))
+                subprocess.getoutput("{0} enable".format(exec))
+                changes = changes + 1
+
+            if enable[name] == False and status == STATUS_ENABLED:
+                print("Disabling {0}".format(name))
+                subprocess.getoutput("{0} disable".format(exec))
+                changes = changes + 1
+        else:
+            pass
+
+    if changes==0:
+        print("Everything is up to date")
+
+def main():
+    cmd = None
+
+    if (len(sys.argv)>1):
+        cmd = sys.argv[1]
+
+    if cmd == "list":
+        list_plugins()
+    elif cmd == "status":
+        status_plugins()
+    elif cmd == "update":
+        update_plugins()
+    else:
+        print("Expected command")
+
+if __name__=="__main__":
+    main()
+
+
