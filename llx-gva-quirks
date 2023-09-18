@@ -3,6 +3,8 @@
 import sys
 import os
 import subprocess
+import json
+import glob
 
 LLX_PLUGIN_PATH="/usr/lib/lliurex-gva-quirks/plugins/"
 LLX_CONFD_PATH="/usr/lib/lliurex-gva-quirks/conf.d/"
@@ -11,6 +13,9 @@ PLUGIN_EXEC = 0
 PLUGIN_NAME = 1
 PLUGIN_DECRIPTION = 2
 PLUGIN_STATUS = 3
+
+STATUS_ENABLED = "enabled"
+STATUS_DISABLED = "disabled"
 
 def _get_plugins():
     plugins=[]
@@ -42,30 +47,45 @@ def update_plugins():
     torun={}
     plugins = _get_plugins()
 
-    for f in os.listdir(LLX_CONFD_PATH):
-        tmp = f.split(".")
-        if (len(tmp)>1):
-            torun[tmp[1]]=True
+    enable = {}
 
-    found={}
+    for c in glob.glob(LLX_CONFD_PATH+"*.conf"):
+        try:
+            f = open(c)
+            data = json.load(f)
+            f.close()
 
-    for k in torun:
-        for p in plugins:
-            name = p[PLUGIN_NAME]
+            for k in data["enable"]:
+                enable[k] = True
 
-            if name == k:
-                found[name] = p[PLUGIN_EXEC]
+            for k in data["disable"]:
+                enable[k] = False
+        except Exception as e:
+            print(e)
+            # just dont care about bad formatted jsons
 
-    for k in found:
-        print("Enabling {0}".format(k))
-        subprocess.getoutput("{0} enable".format(found[k]))
+    changes = 0
 
     for p in plugins:
         name = p[PLUGIN_NAME]
+        status = p[PLUGIN_STATUS]
+        exec = p[PLUGIN_EXEC]
 
-        if not name in found:
-            print("Disabling {0}".format(p[PLUGIN_NAME]))
-            subprocess.getoutput("{0} disable".format(p[PLUGIN_EXEC]))
+        if name in enable:
+            if enable[name] == True and status == STATUS_DISABLED:
+                print("Enabling {0}".format(name))
+                subprocess.getoutput("{0} enable".format(exec))
+                changes = changes + 1
+
+            if enable[name] == False and status == STATUS_ENABLED:
+                print("Disabling {0}".format(name))
+                subprocess.getoutput("{0} disable".format(exec))
+                changes = changes + 1
+        else:
+            pass
+
+    if changes==0:
+        print("Everything is up to date")
 
 def main():
     cmd = None
@@ -81,7 +101,6 @@ def main():
         update_plugins()
     else:
         print("Expected command")
-
 
 if __name__=="__main__":
     main()

@@ -1,0 +1,52 @@
+#!/bin/bash
+
+DUMMY_FILE="/var/lib/lliurex-gva-quirk.dummy"
+
+enable_dummy()
+{
+    touch $DUMMY_FILE
+}
+
+disable_dummy()
+{
+    if [ -f $DUMMY_FILE ]; then
+        rm -f $DUMMY_FILE
+    fi
+}
+
+status_dummy()
+{
+    if [ -f $DUMMY_FILE ]; then
+        printf 'enabled'
+    else
+        printf 'disabled'
+    fi
+}
+
+case "$1" in
+    enable)
+        enable_dummy
+    ;;
+
+    disable)
+        disable_dummy
+    ;;
+
+    status)
+        status_dummy
+    ;;
+
+    name)
+        printf 'dummy'
+    ;;
+
+    help)
+        printf 'Dummy plugin'
+    ;;
+
+    *)
+        exit 1
+    ;;
+esac
+
+exit 0
