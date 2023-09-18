@@ -1,3 +1,9 @@
+lliurex-gva-quirks (23.0.0.1) focal; urgency=medium
+
+  * Updated compat level
+
+ -- Enrique Medina Gremaldos <quiqueiii@gmail.com>  Mon, 18 Sep 2023 13:40:04 +0200
+
 lliurex-gva-quirks (23.0.0.0) focal; urgency=medium
 
   * Initial focal release.
